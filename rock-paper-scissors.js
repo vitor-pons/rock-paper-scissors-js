@@ -1,114 +1,77 @@
-let random;
-let choice;
 let wins = 0;
 let losses = 0;
 let draws = 0;
-let isDataValid;
 
-function runGame() {
-    let playAgain;
-
-    while (playAgain !== false) {
-        isDataValid = true;
-        getUserPick(); 
-
-        if (choice === null) {
-            alert ('Thanks for playing!');
-            break;
-        }
-
-        getComputerPick(); 
-        comparePicks();
-
-        if (isDataValid) {
-            playAgain = confirm ('Do you want to play again?');
-        }
-        
-    }
-    alert ('Goodbye!');
-}
-
-function getComputerPick() { //generates computer's pick
-    random = Math.floor(Math.random() * 101); //random number from 0 - 100
-
-    if (random < 34) {
-        random = 'paper';
-    } else if (random >= 34 && random < 67) {
-        random = 'scissors';
-    } else if (random >= 67) {
-        random = 'rock';
-    }
-}
-
-function getUserPick() { //get user's pick
-    choice = prompt(`rock, paper or scissors? \n
-${wins} wins
-${losses} losses
-${draws} draws`);
-}
-
-function comparePicks() {  //compare computer's pick with user's
-    if (random === 'paper') {
-        switch(choice) {
-            case ('rock'):
-                lostGame();
-                break;
-            case ('scissors'):
-                wonGame();
-                break;
-            case ('paper'):
-                drawGame();
-                break;
-            default:
-                isDataValid = false;
-                alert('Invalid choice! Try again');
-        }
-    } else if (random === 'scissors') {
-        switch(choice) {
-            case ('rock'):
-                wonGame();
-                break;
-            case ('scissors'):
-                drawGame();
-                break;
-            case ('paper'):
-                lostGame();
-                break;
-            default:
-                isDataValid = false;
-                alert('Invalid choice! Try again');
-        }
-    } else if (random === 'rock') {
-        switch(choice) {
-            case ('rock'):
-                drawGame();
-                break;
-            case ('scissors'):
-                lostGame();
-                break;
-            case ('paper'):
-                wonGame();
-                break;
-            default:
-                isDataValid = false;
-                alert('Invalid choice! Try again');
-        }
-    }
-}
-
-function lostGame() {
-    losses++;
-    alert (`You lost! Computer's pick: ${random}`);
-}
-
-function wonGame() {
-    wins++;
-    alert (`You won! Computer's pick: ${random}`);
-}
-
-function drawGame() {
-    draws++;
-    alert (`It's a draw! Computer's pick: ${random}`);
+const OUTCOMES = {
+    rock: { rock: 'draw', paper: 'lost', scissors: 'won' },
+    paper: { rock: 'won', paper: 'draw', scissors: 'lost' },
+    scissors: { rock: 'lost', paper: 'won', scissors: 'draw'}
 }
 
 runGame();
+
+function runGame() {
+    let playAgain = true;
+
+    while (playAgain) {
+        const userPick = getUserPick(); 
+
+        if (userPick === null) {
+            break;
+        }
+
+        const computerPick = getComputerPick(); 
+        const outcome = comparePicks(userPick, computerPick);
+
+        if (!outcome) {
+            alert('Invalid choice! Try again')
+        } else {
+            switch (outcome) {
+                case('draw'):
+                    draws++;
+                    alert(`Computer's pick: ${computerPick}. It's a draw!`);
+                    break;
+                case('won'):
+                    wins++;
+                    alert(`Computer's pick: ${computerPick}. You ${outcome}!`);
+                    break;
+                case('lost'):
+                    losses++;
+                    alert(`Computer's pick: ${computerPick}. You ${outcome}!`);
+                    break;
+            }
+            showResults();
+            playAgain = confirm(`Do you want to play again?`);
+        } 
+    }
+
+    alert ('Thanks for playing! Goodbye!');
+}
+
+function getUserPick() { //get user's pick
+    let choice = prompt('rock, paper or scissors?');
+    if (choice !== null) {
+        choice = choice?.trim().toLowerCase();
+    }
+    return choice;
+}
+
+function getComputerPick() { //generates computer's pick
+    const randomNumber = Math.floor(Math.random() * 101); //random number from 0 - 100
+
+    if (randomNumber < 34) {
+        return 'paper';
+    } else if (randomNumber >= 34 && randomNumber < 67) {
+        return 'scissors';
+    } else {
+        return 'rock';
+    }
+}
+
+function comparePicks(userPick, computerPick) {  //compare computer's pick with user's
+    return OUTCOMES[userPick]?.[computerPick];
+}
+
+function showResults() {
+    alert(`${wins} wins, ${losses} losses, ${draws} draws`);
+}
